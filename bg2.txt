@@ -1,0 +1,60 @@
+// Initialize request counts for DDoS detection
+let requestCounts = {};
+
+// Function to analyze traffic for potential DDoS attacks
+const analyzeTraffic = (details) => {
+  const currentTime = Date.now();
+  const ip = details.initiator || "unknown";
+
+  if (!requestCounts[ip]) {
+    requestCounts[ip] = [];
+  }
+
+  // Add timestamp of the request
+  requestCounts[ip].push(currentTime);
+
+  // Filter requests older than 60 seconds
+  requestCounts[ip] = requestCounts[ip].filter(
+    (timestamp) => currentTime - timestamp < 60000
+  );
+
+  // Trigger alert only if the number of requests exceeds 100 in 60 seconds
+  if (requestCounts[ip].length > 100) {
+    notifyUser("Potential DDoS detected!", `Source: ${ip}`);
+  }
+};
+
+// Function to detect potential XSS attacks
+const detectXSS = (details) => {
+  const url = details.url;
+
+  // Check query parameters only
+  const urlParams = new URL(url).search;
+  if (/((%3C|<).*?(script|img).*?(%3E|>))/i.test(urlParams)) {
+    notifyUser("Potential XSS Detected", `URL: ${url}`);
+  }
+};
+
+// Notify user of suspicious activity
+const notifyUser = (title, message) => {
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "icon.png",
+    title: title,
+    message: message,
+  });
+};
+
+// Event listener to monitor network requests
+chrome.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    const url = details.url;
+
+    // Analyze URL for XSS patterns
+    detectXSS(details);
+
+    // Analyze traffic for DDoS patterns
+    analyzeTraffic(details);
+  },
+  { urls: ["<all_urls>"] } // Intercept all URLs
+);

@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "Network Monitor Extension powered by Anurag",
+    "version": "1.0",
+    "description": "Monitors and analyzes network traffic for anomalies.",
+    "permissions": [
+      "webRequest",
+      "declarativeNetRequest",
+      "storage",
+      "notifications",
+      "tabs"
+    ],
+    "host_permissions": ["<all_urls>"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon.png"
+    },
+    "icons": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    },
+    "declarative_net_request": {
+      "rule_resources": [
+        {
+          "id": "ruleset",
+          "enabled": true,
+          "path": "rules.json"
+        }
+      ]
+    }
+  }
+  
